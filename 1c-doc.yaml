@@ -1,0 +1,1366 @@
+openapi: 3.1.0
+x-stoplight:
+  id: z4zfmsoxey79d
+info:
+  title: VKT 1c API
+  version: '1.0'
+  summary: 'APi для интеграции 1с c приложением VKT '
+  description: 'APi для интеграции 1с c приложением VKT '
+  contact:
+    name: bokus
+    url: 'https://bokus.ru'
+    email: info@bokus.ru
+  termsOfService: 'https://bokus.ru'
+servers:
+  - url: 'http://localhost:3000/api/1c'
+    description: local
+  - url: 'https://dev.vkt.bokus.ru/api/1c'
+    description: dev
+paths:
+  /orders:
+    get:
+      summary: Получить список заказов с сайта
+      tags:
+        - ORDERS
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  result:
+                    type: object
+                    required:
+                      - orders
+                      - page
+                      - limit
+                      - total
+                    properties:
+                      orders:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/order'
+                      page:
+                        type: integer
+                      limit:
+                        type: integer
+                      total:
+                        type: integer
+                required:
+                  - success
+                  - result
+        '401':
+          $ref: '#/components/responses/401-Unauthorized'
+      operationId: get-orders
+      description: Получить список заказов с сайта
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - schema:
+            type: string
+          in: query
+          name: shop_guid
+          description: 'guid магазина из 1c для фильтрации '
+        - schema:
+            type: string
+          in: query
+          name: organization_guid
+          description: guid организации для фильтрации
+        - schema:
+            type: string
+          in: query
+          name: status_id
+          description: id статуса для фильтрации
+        - schema:
+            type: string
+          in: query
+          name: client_id
+          description: Id клиента приложения для фильтрации
+        - schema:
+            type: string
+          in: query
+          name: partner_id
+          description: id партнера для фильтрации
+      requestBody:
+        content: {}
+  '/orders/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+        description: Id заказа в базе сайта
+    get:
+      summary: Получить заказ детально
+      tags:
+        - ORDERS
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                x-examples:
+                  Example 1:
+                    id: 1
+                    organization:
+                      id: 52
+                      guid: af6036ca-2045-11e3-88f2-18a905635344
+                      name: 'Зайцева Наталья Геннадьевна, ИП'
+                    shop:
+                      id: 1
+                      guid: 13c2a88b-204a-11e3-88f2-18a905635344
+                      name: 'Марий Эл, Звениговский р-он, д. Кокшамары, ул. Советская, 12'
+                    status:
+                      id: 1
+                      title: Создан
+                      color: 3D87BD
+                    client:
+                      id: 18
+                      first_name: Ферстнейм7
+                      second_name: Секонднейм7
+                      last_name: Ластнейм7
+                      email: mael7@box.ru
+                      phone: '77777777777'
+                    number: 00a-19283987
+                    total: 1990.28
+                    total_with_discount: 1980.33
+                    delivery_date: '2023-12-22'
+                    created_at: '2023-10-09T08:35:07.000000Z'
+                    payment: null
+                    pdz_payment:
+                      id: 1
+                      type:
+                        id: 2
+                        title: Карта
+                      status: NEW
+                      external_id: 2cb5cefb-000f-5000-8000-1530a7d6a819
+                      url: 'https://yoomoney.ru/checkout/payments/v2/contract?orderId=2cb5cefb-000f-5000-8000-1530a7d6a819'
+                      amount: 1000
+                      description: 'Оплата ПДЗ, ИНН: 121506519408'
+                      bill_description: null
+                      bill_email: null
+                    items:
+                      - id: '1_'
+                        product_id: 1
+                        title: 'Конфеты "Твикс"Минис весовые, 2,7кг'
+                        quantity: 2
+                        quantity_fact: 0
+                        price: 876.32
+                        discount_price: 876.32
+                        total: 1752.64
+                        product_guid: 78f8d5cc-73e7-11e4-8cc9-18a905635344
+                        product_number: '10061'
+                      - id: '9_'
+                        product_id: 9
+                        title: Конс."Огурцы консерв."ГОСТ 3л с/б (лимонка) Южный КЗ
+                        quantity: 2
+                        quantity_fact: 0
+                        price: 118.82
+                        discount_price: 118.82
+                        total: 237.64
+                        product_guid: b0ae3a43-8a98-11e4-80c0-1458d051736c
+                        product_number: '12966'
+                properties:
+                  success:
+                    type: boolean
+                  result:
+                    type: object
+                    required:
+                      - order
+                    properties:
+                      order:
+                        $ref: '#/components/schemas/OrderDetail'
+                required:
+                  - success
+                  - result
+      operationId: get-orders-id
+      description: Получить заказ детально
+  '/orders/{id}/update':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+        description: id заказа
+    post:
+      summary: Изменить статус заказа
+      operationId: post-orders-id-status
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                required:
+                  - success
+      tags:
+        - ORDERS
+      description: 'передаетсся id статуса заказа. Если заказ уже находится в этом статусу, то вернутся 400я ошибка'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status_id:
+                  type: integer
+                  description: id статуса
+                items:
+                  type: array
+                  description: 'необязательное поле, фактическое количество по заказу будет обновляться только в случае заполнения этого поля'
+                  items:
+                    type: object
+                    properties:
+                      product_guid:
+                        type: string
+                        description: GUID товара в системе 1c
+                      fact_quantity:
+                        type: number
+                        description: Фактическое количество товара
+                    required:
+                      - product_guid
+                      - fact_quantity
+                car_guid:
+                  type: string
+                  description: |-
+                    GUID машины для отслеживания. Необязательное поле
+
+                    Заказ становится доступен для отслеживания с момента появления в заказе этого поля
+              required:
+                - status_id
+        description: 'если передать неверный id статуса, например несуществующий, то вернется 422я ошибка'
+  /orders/statuses:
+    get:
+      summary: Получить список возможных статусов заказа
+      tags:
+        - ORDERS
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  result:
+                    type: object
+                    required:
+                      - statuses
+                    properties:
+                      statuses:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              description: id статуса - его передаем при изменении статуса заказа
+                            color:
+                              type: string
+                              description: цвет
+                            title:
+                              type: string
+                              description: Заголовок
+                            sort:
+                              type: integer
+                              description: сортировка - чем меньше -тем выше
+                          required:
+                            - id
+                            - color
+                            - title
+                            - sort
+                required:
+                  - success
+                  - result
+      operationId: get-orders-statuses
+      description: Получить список возможных статусов заказа
+  /refunds:
+    get:
+      summary: Получить список возвратов
+      tags:
+        - REFUNDS
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    x-stoplight:
+                      id: cp9jfdbofkcr3
+                  result:
+                    type: object
+                    x-stoplight:
+                      id: 04om8521usyn3
+                    required:
+                      - refunds
+                      - page
+                      - limit
+                      - total
+                    properties:
+                      refunds:
+                        type: array
+                        x-stoplight:
+                          id: u78as9qaqgfq9
+                        items:
+                          $ref: '#/components/schemas/Refund'
+                          x-stoplight:
+                            id: nc2x4zjwvt73n
+                      page:
+                        type: integer
+                        x-stoplight:
+                          id: 4onxqdaqf0h4c
+                      limit:
+                        type: integer
+                        x-stoplight:
+                          id: pfxwy7ox61d5p
+                      total:
+                        type: integer
+                        x-stoplight:
+                          id: ks6liatlveo8o
+                required:
+                  - success
+                  - result
+      operationId: get-refunds
+      description: Получить список возвратов
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - schema:
+            type: string
+          in: query
+          name: status_id
+          description: ID статуса для фильтрации (необязательное)
+  '/refunds/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Получить возврат детально
+      tags:
+        - REFUNDS
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    x-stoplight:
+                      id: r5pt1mp2aqjg1
+                  result:
+                    type: object
+                    x-stoplight:
+                      id: quudftnsnng8w
+                    properties:
+                      refund:
+                        $ref: '#/components/schemas/RefundDetail'
+                        x-stoplight:
+                          id: tkf9szf1l1w03
+      operationId: get-refunds-id
+      description: Получить возврат детально
+      requestBody:
+        content: {}
+  '/refunds/{id}/update':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Редактирование возврата
+      tags:
+        - REFUNDS
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    x-stoplight:
+                      id: qehbjow5hbw98
+                required:
+                  - success
+      operationId: get-refunds-id-update
+      description: Редкатирование
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              x-examples:
+                Example 1:
+                  status_id: 4
+                  items:
+                    - product_guid: f774e183-6a5b-11ed-818d-00155d004204
+                      confirmed_quantity: 3
+                  answer: Одобрили вам возврат
+              properties:
+                status_id:
+                  type: integer
+                  description: Статус возврата - число из статусов ЦРМ
+                items:
+                  type: array
+                  description: массив одобреных к возврату товаров
+                  items:
+                    type: object
+                    properties:
+                      product_guid:
+                        type: string
+                        description: guid товара
+                      confirmed_quantity:
+                        type: number
+                        description: количество одобренного возврата
+                    required:
+                      - product_guid
+                      - confirmed_quantity
+                answer:
+                  type: string
+                  description: ответ менеджера
+              required:
+                - status_id
+                - items
+                - answer
+  /notifications/create:
+    post:
+      tags:
+        - NOTIFICATIONS
+      summary: 1c отправка уведомлений
+      operationId: post-notifications-create
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    x-stoplight:
+                      id: bqdqj2q6w2hd8
+                  result:
+                    type: object
+                    x-stoplight:
+                      id: ujxp0apo1xr5p
+                    description: если есть - значит есть ненайденные в базе GUID'ы
+                    properties:
+                      missing_guids:
+                        type: array
+                        x-stoplight:
+                          id: wl00g7nbmdxlz
+                        description: список ненайденных в базе GUID'ов
+                        items:
+                          x-stoplight:
+                            id: gq69tue68h8ck
+                          type: string
+                required:
+                  - success
+            application/xml:
+              schema:
+                type: object
+                properties: {}
+      description: Отправляет уведомления из 1с
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                notification_type_id:
+                  type: integer
+                  x-stoplight:
+                    id: nb8o66ebwpqcr
+                  description: id типа уведомления
+                title:
+                  type: string
+                  x-stoplight:
+                    id: nvjjtdp3cbdra
+                  description: заголовок
+                message:
+                  type: string
+                  x-stoplight:
+                    id: we2qj0b0cx5uh
+                  description: тело сообщения
+                button_url:
+                  type: string
+                  x-stoplight:
+                    id: u2u6660lnrs29
+                  description: ссылка кнопки
+                button_text:
+                  type: string
+                  x-stoplight:
+                    id: n36v9892oakf1
+                  description: текст кнопки
+                shop_guids:
+                  type: array
+                  x-stoplight:
+                    id: zya2mgsepg201
+                  description: 'массив guid''ов магазинов, по клиентам которых разослать уведомление'
+                  items:
+                    x-stoplight:
+                      id: 4738lvgv057a4
+                    type: string
+                organization_inn:
+                  type: string
+                  x-stoplight:
+                    id: fo2nug0i4sftp
+                  description: инн организации по клиентам которой разослать уведомление
+                image:
+                  type: object
+                  x-stoplight:
+                    id: 4nbb1ohgnvnbc
+                  description: файл отправляется с помощью multipart form data
+              required:
+                - notification_type_id
+                - title
+                - message
+            examples:
+              Example 1:
+                value:
+                  notification_type_id: 0
+                  title: string
+                  message: string
+                  button_url: string
+                  button_text: string
+                  shop_guids:
+                    - string
+                  organization_inn: string
+        description: |-
+          Формат тела - multipart/form-data.
+
+          Если нет ни ИНН ни GUIDs - по всем клиентам.
+          Есть ИНН - по клиентам организации.
+          Есть GUIDs - по клиентам данных магазинов.
+          Есть и ИНН и GUIDs - по клиентам организации и по клиентам данных магазинов.
+components:
+  schemas:
+    order:
+      type: object
+      title: Заказ
+      description: Заказ
+      x-tags:
+        - ORDERS
+      properties:
+        id:
+          type: integer
+          description: ID заказа в базе сайта
+          example: 123
+        guid:
+          type: string
+          example: 22345200-abe8-4f60-90c8-0d43c5f6c0f6
+          description: GUID заказа
+        shop:
+          type: object
+          description: Магазин на который оформлен заказ
+          required:
+            - id
+            - guid
+            - name
+          properties:
+            id:
+              type: integer
+              description: ID магазина в базе сайта
+              example: 45
+            guid:
+              type: string
+              description: guid магазина в базе 1c
+              example: ad5e1e57-8282-11df-9445-00804828e992
+            name:
+              type: string
+              description: Наименование магазина
+              example: 'Лукояновский р-он, с. Поя, ул. Школьная, 1а, магазин'
+        status:
+          type: object
+          description: Текущий статус заказа
+          required:
+            - id
+            - title
+            - color
+          properties:
+            id:
+              type: integer
+              description: ID статуса заказа в локальной базе
+              example: 1
+            title:
+              type: string
+              description: Наименование статуса
+              example: Создан
+            color:
+              type: string
+              description: '"Цвет" статуса - цвейт бейджа статуса в формате hex #212121'
+              example: '#3D87BD'
+        number:
+          type: string
+          description: Номер заказа - человекомчитаемый - доступен клиенту
+          example: A-1412898
+        total:
+          type: number
+          description: сумма за весь заказ без учета скидок
+          example: 1234.56
+        total_with_discount:
+          type: number
+          description: Сумма за заказ с учетом всех скидок
+          example: 1234.56
+        comment:
+          type: string
+          description: коментарий заказа
+          example: test order
+        delivery_date:
+          type: string
+          description: Выбранная клиентом дата доставки
+          example: '2023-12-22'
+        created_at:
+          type: string
+          description: Дата создания заказа
+          example: '2023-10-09T08:35:07.000000Z'
+        payment:
+          $ref: '#/components/schemas/OrderPayment'
+          description: Объект опалты за заказ. На определенных этапах может быть пустым
+        pdz_payment:
+          $ref: '#/components/schemas/OrderPayment'
+          description: 'Объект оплаты за ПДЗ. может быть пустым, если на момент оформления заказа у клиента не было ПДЗ'
+        client:
+          $ref: '#/components/schemas/OrderClient'
+        partner:
+          $ref: '#/components/schemas/Partner'
+          x-stoplight:
+            id: 4xalfqe8aip11
+      required:
+        - id
+        - guid
+        - shop
+        - status
+        - number
+        - total
+        - total_with_discount
+        - delivery_date
+        - created_at
+    OrderPayment:
+      type: object
+      x-examples:
+        Example 1:
+          id: 1
+          type:
+            id: 2
+            title: Карта
+          status: NEW
+          external_id: 2cb5cefb-000f-5000-8000-1530a7d6a819
+          url: 'https://yoomoney.ru/checkout/payments/v2/contract?orderId=2cb5cefb-000f-5000-8000-1530a7d6a819'
+          amount: '1000'
+          description: 'Оплата ПДЗ, ИНН: 121506519408'
+          bill_description: null
+          bill_email: null
+      properties:
+        id:
+          type: integer
+          description: ID оплаты в бд сайта
+          example: 123
+        type:
+          type: object
+          description: выбранный способ оплаты
+          required:
+            - id
+            - title
+            - code
+          properties:
+            id:
+              type: integer
+              description: ID способа оплаты в БД сайта
+              example: 1
+            title:
+              type: string
+              description: Наименование способа оплаты
+              example: Оплата по счету
+            code:
+              type: string
+              description: код способа оплаты invoice|card|sberbusiness|cash|free|points
+        status:
+          type: string
+          description: 'Статус оплаты. Может принимать значения NEW, SUCCESS, CANCEL, FAIL'
+          example: NEW
+        external_id:
+          type:
+            - string
+            - 'null'
+          description: Внешний ID оплаты. Может использоваться при создании оплатычерез эквайринг или сбербизнес
+          example: 98b77540-3e62-450b-9785-d917d2b17321
+        url:
+          type:
+            - string
+            - 'null'
+          description: url оплаты
+          example: 'https:\/\/yoomoney.ru\/checkout\/payments\/v2\/contract?orderId=2cb5cefb-000f-5000-8000-1530a7d6a819'
+        amount:
+          type: number
+          description: Cумма оплаты (непосредственно к оплате). с учетом всех скидок
+          default: 1000.76
+        description:
+          type:
+            - string
+            - 'null'
+          description: Описание оплаты
+        bill_description:
+          type:
+            - string
+            - 'null'
+          description: |
+            комментарий к выставлению счета в случае выбора спрособа оплаты "оплата по счету"
+          example: Счет на оплату пришлите на этот email
+        bill_email:
+          type:
+            - string
+            - 'null'
+          description: |
+            email для выставления счета в случае выбора спрособа оплаты "оплата по счету"
+          example: example@mail.ru
+        free_reason:
+          type:
+            - string
+            - 'null'
+          description: Код причины почему пользователь не гасит ПДЗ при оформлении заказа
+          example: revice
+        free_reason_description:
+          type:
+            - string
+            - 'null'
+          description: 'описание причины оформления заказа без оплаты пдз при оформлении заказа, заполненное пользоватлем'
+          example: Денежные средства в пути
+        free_reason_files:
+          type:
+            - array
+            - 'null'
+          description: |
+            Массив файлов прикрепленных пользователем при отказе оплачивать ПДЗ, акты сверки и прочее
+          items: {}
+      required:
+        - id
+        - type
+        - status
+        - external_id
+        - url
+        - amount
+        - description
+        - bill_description
+        - bill_email
+    OrderClient:
+      title: OrderClient
+      x-stoplight:
+        id: z1286o64o3hfg
+      type: object
+      properties:
+        id:
+          type: integer
+        first_name:
+          type: string
+        last_name:
+          type: string
+        second_name:
+          type: string
+        phone:
+          type: string
+        email:
+          type:
+            - string
+            - 'null'
+      required:
+        - id
+        - first_name
+        - last_name
+        - second_name
+        - phone
+        - email
+    OrderDetail:
+      type: object
+      x-examples:
+        Example 1:
+          id: 1
+          organization:
+            id: 52
+            guid: af6036ca-2045-11e3-88f2-18a905635344
+            name: 'Зайцева Наталья Геннадьевна, ИП'
+          shop:
+            id: 1
+            guid: 13c2a88b-204a-11e3-88f2-18a905635344
+            name: 'Марий Эл, Звениговский р-он, д. Кокшамары, ул. Советская, 12'
+          status:
+            id: 1
+            title: Создан
+            color: 3D87BD
+          client:
+            id: 18
+            first_name: Ферстнейм7
+            second_name: Секонднейм7
+            last_name: Ластнейм7
+            email: mael7@box.ru
+            phone: '77777777777'
+          number: 00a-19283987
+          total: 1990.28
+          total_with_discount: 1980.33
+          delivery_date: '2023-12-22'
+          created_at: '2023-10-09T08:35:07.000000Z'
+          payment: null
+          pdz_payment:
+            id: 1
+            type:
+              id: 2
+              title: Карта
+            status: NEW
+            external_id: 2cb5cefb-000f-5000-8000-1530a7d6a819
+            url: 'https://yoomoney.ru/checkout/payments/v2/contract?orderId=2cb5cefb-000f-5000-8000-1530a7d6a819'
+            amount: 1000
+            description: 'Оплата ПДЗ, ИНН: 121506519408'
+            bill_description: null
+            bill_email: null
+          items:
+            - id: '1_'
+              product_id: 1
+              title: 'Конфеты "Твикс"Минис весовые, 2,7кг'
+              quantity: 2
+              quantity_fact: 0
+              price: 876.32
+              discount_price: 876.32
+              total: 1752.64
+              product_guid: 78f8d5cc-73e7-11e4-8cc9-18a905635344
+              product_number: '10061'
+            - id: '9_'
+              product_id: 9
+              title: Конс."Огурцы консерв."ГОСТ 3л с/б (лимонка) Южный КЗ
+              quantity: 2
+              quantity_fact: 0
+              price: 118.82
+              discount_price: 118.82
+              total: 237.64
+              product_guid: b0ae3a43-8a98-11e4-80c0-1458d051736c
+              product_number: '12966'
+      properties:
+        id:
+          type: integer
+        guid:
+          type: string
+          description: GUID заказа
+          example: 22345200-abe8-4f60-90c8-0d43c5f6c0f6
+        organization:
+          type: object
+          required:
+            - id
+            - guid
+            - name
+          properties:
+            id:
+              type: integer
+            guid:
+              type: string
+            name:
+              type: string
+        shop:
+          type: object
+          required:
+            - id
+            - guid
+            - name
+          properties:
+            id:
+              type: integer
+            guid:
+              type: string
+            name:
+              type: string
+        status:
+          type: object
+          required:
+            - id
+            - title
+            - color
+          properties:
+            id:
+              type: integer
+            title:
+              type: string
+            color:
+              type: string
+        client:
+          $ref: '#/components/schemas/OrderClient'
+        number:
+          type: string
+        total:
+          type: number
+        total_with_discount:
+          type: number
+        comment:
+          type: string
+          description: коментарий заказа
+          example: test order
+        delivery_date:
+          type: string
+        created_at:
+          type: string
+        payment:
+          $ref: '#/components/schemas/OrderPayment'
+        pdz_payment:
+          $ref: '#/components/schemas/OrderPayment'
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: строковый id элемента корзины
+              product_id:
+                type: integer
+                description: id товара в базе сайта
+              title:
+                type: string
+                description: название товара
+              quantity:
+                type: number
+                description: количество
+              quantity_fact:
+                type: number
+                description: количество факт
+              price:
+                type: number
+                description: цена товара за единицу
+              discount_price:
+                type: number
+                description: цена по которой товар бы про(с учетом скидок)
+              total:
+                type: number
+                description: сумма к оплате за позицию
+              product_guid:
+                type: string
+                description: guid товара в базе 1c
+              product_number:
+                type: string
+                description: артикул
+            required:
+              - id
+              - product_id
+              - title
+              - quantity
+              - quantity_fact
+              - price
+              - discount_price
+              - total
+              - product_guid
+              - product_number
+        partner:
+          $ref: '#/components/schemas/Partner'
+          x-stoplight:
+            id: 9t85hph70xmpw
+      required:
+        - id
+        - guid
+        - organization
+        - shop
+        - status
+        - client
+        - number
+        - total
+        - total_with_discount
+        - delivery_date
+        - created_at
+        - items
+    Refund:
+      type: object
+      x-examples:
+        Example 1:
+          id: 1
+          organization:
+            id: 13728
+            name: 'Кралева Айвина Васильевна, ИП'
+          shop:
+            id: 27357
+            name: 'Владимирская обл, Гороховецкий р-н, с. Фоминки, ул. Советская, 3'
+          status:
+            id: 1
+            title: Новая
+            color: 3D87BD
+            text: находится в модерации. Ответ придет в течении 3х дней.
+          order:
+            id: 9
+            delivery_date: '2023-11-30'
+            created_at: '2023-11-24T09:04:21.000000Z'
+          answer: null
+          comment: тест
+          total: 557.7
+          created_at: '2023-11-24T10:47:35.000000Z'
+      properties:
+        id:
+          type: integer
+          description: id возврата
+        guid:
+          type: string
+          x-stoplight:
+            id: 5b4kywktujbkp
+          description: GUID сгенерированый на стороне бэка
+        organization:
+          type: object
+          description: организация
+          required:
+            - id
+            - name
+            - guid
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            guid:
+              type: string
+              x-stoplight:
+                id: 5oveg46sxspjn
+        shop:
+          type: object
+          description: 'магазин в котором сделан заказ '
+          required:
+            - id
+            - name
+            - guid
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            guid:
+              type: string
+              x-stoplight:
+                id: 42rlgq2rsji6d
+        status:
+          type: object
+          description: статус возврата
+          required:
+            - id
+            - title
+            - color
+            - text
+          properties:
+            id:
+              type: integer
+            title:
+              type: string
+            color:
+              type: string
+            text:
+              type: string
+        order:
+          type: object
+          description: заказ к которому прикреплен возврат
+          required:
+            - id
+            - delivery_date
+            - created_at
+            - guid
+          properties:
+            id:
+              type: integer
+            delivery_date:
+              type: string
+            created_at:
+              type: string
+            guid:
+              type: string
+              x-stoplight:
+                id: vgq4cy5frqgn5
+        answer:
+          type: 'null'
+          description: Ответ менеджера по возврату
+        comment:
+          type: string
+          description: комментарий клиента к возврату
+        total:
+          type: number
+          description: сумма возврата
+        created_at:
+          type: string
+          description: дата создания возврата
+      required:
+        - id
+        - guid
+        - organization
+        - shop
+        - status
+        - order
+        - answer
+        - comment
+        - total
+        - created_at
+    RefundDetail:
+      type: object
+      x-examples:
+        Example 1:
+          id: 1
+          organization:
+            id: 13728
+            name: 'Кралева Айвина Васильевна, ИП'
+          shop:
+            id: 27357
+            name: 'Владимирская обл, Гороховецкий р-н, с. Фоминки, ул. Советская, 3'
+          status:
+            id: 1
+            title: Новая
+            color: 3D87BD
+            text: находится в модерации. Ответ придет в течении 3х дней.
+          order:
+            id: 9
+            delivery_date: '2023-11-30'
+            created_at: '2023-11-24T09:04:21.000000Z'
+          answer: null
+          comment: тест
+          total: 557.7
+          created_at: '2023-11-24T10:47:35.000000Z'
+          items:
+            - product_id: 4713
+              product_title: Вафли ЛОАКЕР Классик Кремкакао 45г
+              product_image: 'http://tdvkt.ru/foto/38223.png'
+              quantity: 6
+              confirmed_quantity: null
+              refund_price: 47.43
+              reason_text: Производственный брак
+            - product_id: 4752
+              product_title: Печенье слоеное "Слоеные рулетики" с начинкой со вкусом шоколада вес 2кг Экран
+              product_image: 'http://tdvkt.ru/foto/38271.png'
+              quantity: 1
+              confirmed_quantity: null
+              refund_price: 273.12
+              reason_text: Некачественная продукция
+      properties:
+        id:
+          type: integer
+        guid:
+          type: string
+          x-stoplight:
+            id: ofvmb8cixslye
+          description: GUID сгенерированый на стороне бэка
+        organization:
+          type: object
+          required:
+            - id
+            - name
+            - guid
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            guid:
+              type: string
+              x-stoplight:
+                id: s2tpfe4o8at7w
+        shop:
+          type: object
+          required:
+            - id
+            - name
+            - guid
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            guid:
+              type: string
+              x-stoplight:
+                id: vnqxk07zdzz7e
+        status:
+          type: object
+          required:
+            - id
+            - title
+            - color
+            - text
+          properties:
+            id:
+              type: integer
+            title:
+              type: string
+            color:
+              type: string
+            text:
+              type: string
+        order:
+          type: object
+          required:
+            - id
+            - delivery_date
+            - created_at
+          properties:
+            id:
+              type: integer
+            delivery_date:
+              type: string
+            created_at:
+              type: string
+        answer:
+          type:
+            - string
+            - 'null'
+        comment:
+          type: string
+        total:
+          type: number
+        created_at:
+          type: string
+          description: дата создания возврата
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              product_id:
+                type: integer
+                description: Id товара в системе сайта
+              product_title:
+                type: string
+                description: наименование товара
+              product_image:
+                type: string
+                description: изображение товара
+              quantity:
+                type: integer
+              confirmed_quantity:
+                type:
+                  - integer
+                  - 'null'
+              refund_price:
+                type: number
+                description: цена возврата (цена по которой был куплен товар)
+              reason_text:
+                type: string
+                description: причина возврата для позиции
+              product_guid:
+                type: string
+                x-stoplight:
+                  id: y13rlrct22svp
+                description: GUID товара
+            required:
+              - product_id
+              - product_title
+              - product_image
+              - quantity
+              - confirmed_quantity
+              - refund_price
+              - reason_text
+              - product_guid
+        files:
+          type: array
+          x-stoplight:
+            id: xzcl9gd9s40ov
+          description: массив ссылок на прикрепленные пользователем файлы
+          items:
+            x-stoplight:
+              id: jcznfl8i06e9f
+            type: string
+      required:
+        - id
+        - guid
+        - organization
+        - shop
+        - status
+        - order
+        - answer
+        - comment
+        - total
+        - created_at
+        - items
+        - files
+    Partner:
+      title: Partner
+      x-stoplight:
+        id: x9ptu4n8r5os9
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+          x-stoplight:
+            id: 0i928hc9ucyp4
+      required:
+        - id
+        - title
+  securitySchemes:
+    bearertoken:
+      type: http
+      scheme: bearer
+      description: ''
+  parameters:
+    page:
+      name: page
+      in: query
+      schema:
+        type: integer
+      description: 'номер страницы, по умолчанию 1'
+      required: true
+    limit:
+      name: limit
+      in: query
+      required: true
+      schema:
+        type: integer
+      description: 'количество элементов, выводимых на одной странице. по умолчанию 100, не более 1000'
+  responses:
+    401-Unauthorized:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                description: 'значение успешности запроса, в случае ошибки false'
+              error:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: код ошибки
+                  message:
+                    type: string
+                    description: сообщение об ошибке
+                  reason:
+                    type: string
+                    description: причина ошибки
+                required:
+                  - code
+                  - message
+                  - reason
+tags:
+  - name: NOTIFICATIONS
+    description: Уведомления
+  - name: ORDERS
+    description: Заказы
+  - name: REFUNDS
+    description: Возвраты
