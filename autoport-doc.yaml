@@ -1,0 +1,386 @@
+openapi: 3.1.0
+x-stoplight:
+  id: lgl18ncxkc0lg
+info:
+  title: Autoport External
+  version: '1.0'
+  contact:
+    name: Egor
+    email: yaklich.ea@bokus.ru
+  description: АПИ документация "Autoport" для внешнего обмена
+servers:
+  - url: 'http://lk.promneft.ru:15502'
+    description: promneft
+paths:
+  /cards:
+    get:
+      summary: Получить список карт
+      tags:
+        - CARD
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    x-stoplight:
+                      id: 6te5z8hgygmzg
+                  result:
+                    type: object
+                    x-stoplight:
+                      id: 8iwed0h9r6hq1
+                    required:
+                      - cards
+                    properties:
+                      cards:
+                        type: array
+                        x-stoplight:
+                          id: tont6t5wtd2qx
+                        items:
+                          $ref: '#/components/schemas/CardShort'
+                          x-stoplight:
+                            id: nu5dz2vuz2h3m
+                required:
+                  - success
+                  - result
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    x-stoplight:
+                      id: gduek8yk4u1k0
+                    description: если ошибка то = false
+                  error:
+                    type: string
+                    x-stoplight:
+                      id: 6vqurg8x29rug
+                    description: короткое описание ошибки
+                required:
+                  - success
+                  - error
+      operationId: get-cards
+      description: Получить список карт по номеру телефона
+      parameters:
+        - schema:
+            type: string
+            maxLength: 11
+            example: '79999999999'
+          in: query
+          name: phone
+          description: номер телефона
+          required: true
+    post:
+      summary: Создать карту
+      operationId: post-cards
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    x-stoplight:
+                      id: 4yhpsu8p6344t
+                  result:
+                    type: object
+                    x-stoplight:
+                      id: sohk9bxilx669
+                    required:
+                      - cards
+                    properties:
+                      cards:
+                        type: array
+                        x-stoplight:
+                          id: 0j5ahgaeok8rf
+                        items:
+                          $ref: '#/components/schemas/CardShort'
+                          x-stoplight:
+                            id: f69w23rxxtahm
+                required:
+                  - success
+                  - result
+      description: Создать карту клиента. В ответе содержиться акутальный список карт.
+      tags:
+        - CARD
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: integer
+                  x-stoplight:
+                    id: axwfc1txbtlub
+                  description: |-
+                    формат начинается на 7ку и длинной 11 цифр:
+                    79999999999
+                first_name:
+                  type: string
+                  x-stoplight:
+                    id: z518riqal767g
+                second_name:
+                  type: string
+                  x-stoplight:
+                    id: xz9c420vnhrdo
+                last_name:
+                  type: string
+                  x-stoplight:
+                    id: 9872fg3527fsq
+                birth_date:
+                  type: string
+                  x-stoplight:
+                    id: mnbgot9xohia7
+                  description: 'формат "Y-m-d": "2023-10-26"'
+              required:
+                - phone
+        description: ''
+  /refuels:
+    get:
+      summary: Получить историю заправок
+      tags:
+        - REFUELS
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  succes:
+                    type: boolean
+                    x-stoplight:
+                      id: nfvirnz1dh1m3
+                  result:
+                    type: object
+                    x-stoplight:
+                      id: etccshhvo2qrb
+                    required:
+                      - refuels
+                    properties:
+                      refuels:
+                        type: array
+                        x-stoplight:
+                          id: s6mib30177g98
+                        items:
+                          $ref: '#/components/schemas/Refuel'
+                          x-stoplight:
+                            id: 2no2rioh90glg
+                required:
+                  - succes
+                  - result
+      operationId: get-refuels
+      description: 'Получить историю запровок. Если не указан параметр "month", то берется текущий'
+      parameters:
+        - schema:
+            type: integer
+          in: query
+          name: phone
+          required: true
+          description: номер телефона 79999999999
+        - schema:
+            type: integer
+          in: query
+          name: card
+          description: номер карты 2100047692
+          required: true
+        - schema:
+            type: integer
+          in: query
+          name: month
+          description: необязательный порядковый номер месяца
+  /promotions:
+    get:
+      summary: Получить список акции
+      tags:
+        - PROMOTIONS
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    x-stoplight:
+                      id: gj74kh9cf9cox
+                  result:
+                    type: object
+                    x-stoplight:
+                      id: a5u8a74y8o2up
+                    required:
+                      - promotions
+                    properties:
+                      promotions:
+                        type: array
+                        x-stoplight:
+                          id: uzaubu5qb2ff3
+                        items:
+                          $ref: '#/components/schemas/PromotionShort'
+                          x-stoplight:
+                            id: q5n7e5ut3fk9s
+                required:
+                  - success
+                  - result
+      operationId: get-promotions
+      description: 'Получить список акций. Если в запросе существуют необязательные параметры "phone" и "card", то к каждой акции, где есть количества применений, отправлять поля "max_operations" и  "current_operations" пользователя этого телефона и карты.'
+      parameters:
+        - schema:
+            type: integer
+          in: query
+          name: phone
+          description: телефон формата 79999999999
+        - schema:
+            type: number
+          in: query
+          name: card
+          description: карта формата 2100047692
+components:
+  schemas:
+    CardShort:
+      title: CardShort
+      x-stoplight:
+        id: vs4tmtoviqbab
+      type: object
+      description: Карта коротко
+      properties:
+        number:
+          type: integer
+          x-stoplight:
+            id: q3ppcqvle38oj
+          description: пример 2100047692
+        bonuses:
+          type: number
+          x-stoplight:
+            id: p9gdtlwwylwck
+          format: float
+          example: 16.8
+          description: пример 16.8
+      required:
+        - number
+    Refuel:
+      title: Refuel
+      x-stoplight:
+        id: z5wc4lowmlg2c
+      type: object
+      description: Элемент истории запровок
+      properties:
+        id:
+          type: string
+          x-stoplight:
+            id: lannpzo2alylj
+          description: идентификатор заправки/чека
+        title:
+          type: string
+          x-stoplight:
+            id: 6p6x5cu2julwq
+          maxLength: 255
+          description: Наименование заправки
+        cost:
+          type: string
+          x-stoplight:
+            id: 3fr0ins8ji2l9
+          description: стоимость заправки в рублях
+        delta_points:
+          type: string
+          x-stoplight:
+            id: dk0byv8wsy3is
+          description: изменение количества баллов
+        date_time:
+          type: string
+          x-stoplight:
+            id: wjcvwpa4t5vap
+          description: 'дата_время завправки 2023-10-26 18:44:20'
+          format: date-time
+        station_address:
+          type: string
+          x-stoplight:
+            id: 8w3e9u3rjxquf
+        receipt:
+          type: string
+          x-stoplight:
+            id: 1lplul9j17e1g
+          format: json-pointer
+          description: 'json чека. наименования/стоимость позиций, сумма, итоговая стоимость, Способ оплаты'
+      required:
+        - id
+        - title
+        - cost
+        - date_time
+        - receipt
+      examples:
+        - id: '3946'
+          title: Заправка
+          cost: '2000'
+          delta_points: '100'
+          date_time: '2019-08-24T14:15:22Z'
+          station_address: 'г.Чебоксарыб ул. Солнечная, 26'
+          receipt: /json/pointer
+    PromotionShort:
+      title: PromotionShort
+      x-stoplight:
+        id: zerrxcb0ujg4k
+      type: object
+      description: Элемент списка акции
+      properties:
+        id:
+          type: string
+          description: идентификатор акции
+        title:
+          type: string
+          x-stoplight:
+            id: vr35fjz7rnv3f
+          description: Заголовок акции
+        short_description:
+          type: string
+          x-stoplight:
+            id: gakoip9add1fs
+          description: короткое пояснение
+        image:
+          type: string
+          x-stoplight:
+            id: rmnekkp8hsrug
+          description: полный путь к изображению
+        max_operations:
+          type: integer
+          x-stoplight:
+            id: e576nldi9i3mi
+          description: максимальное количество применений
+        current_operations:
+          type: integer
+          x-stoplight:
+            id: ep7y014gnnp6t
+          description: текущее количество применений
+        active_until:
+          type: string
+          x-stoplight:
+            id: 5qm0x0xff07wf
+          description: дата до которой акция действительна формата 2023-10-26
+      required:
+        - id
+        - title
+        - image
+  securitySchemes: {}
+tags:
+  - name: CARD
+    description: Карты
+  - name: PROMOTIONS
+    description: Маркетинговые акции
+  - name: REFUELS
+    description: События-заправки
