@@ -280,58 +280,89 @@ components:
         id: z5wc4lowmlg2c
       type: object
       description: Элемент истории запровок
+      examples: []
       properties:
-        id:
-          type: string
+        station_id:
+          type: integer
           x-stoplight:
             id: lannpzo2alylj
-          description: идентификатор заправки/чека
-        title:
-          type: string
-          x-stoplight:
-            id: 6p6x5cu2julwq
-          maxLength: 255
-          description: Наименование заправки
-        cost:
-          type: string
-          x-stoplight:
-            id: 3fr0ins8ji2l9
-          description: стоимость заправки в рублях
-        delta_points:
-          type: string
-          x-stoplight:
-            id: dk0byv8wsy3is
-          description: изменение количества баллов
+          description: идентификатор заправки
         date_time:
           type: string
           x-stoplight:
             id: wjcvwpa4t5vap
           description: 'дата_время завправки 2023-10-26 18:44:20'
           format: date-time
-        station_address:
+        litres:
+          type: number
+          x-stoplight:
+            id: 6p6x5cu2julwq
+          format: float
+          description: |
+            литров заправлено
+        price:
+          type: number
+          x-stoplight:
+            id: 3fr0ins8ji2l9
+          description: цена литра в рублях
+          format: float
+        summ:
+          type: number
+          x-stoplight:
+            id: dk0byv8wsy3is
+          format: float
+          description: итоговая сумма в рублях
+        products_title:
           type: string
           x-stoplight:
             id: 8w3e9u3rjxquf
-        receipt:
-          type: string
+          description: наименование продукта
+        bonuses_percentage:
+          type: number
           x-stoplight:
             id: 1lplul9j17e1g
-          format: json-pointer
-          description: 'json чека. наименования/стоимость позиций, сумма, итоговая стоимость, Способ оплаты'
+          format: float
+          description: Процент баллов за покупку
+        is_card_payment:
+          type: boolean
+          x-stoplight:
+            id: xvqxcpnozyzdj
+          description: Способ оплаты картой ли
+        earned_bonuses:
+          type: number
+          x-stoplight:
+            id: ce6hddyqqrs7j
+          format: float
+          description: начислено бонусов
+        total_bokuses:
+          type: number
+          x-stoplight:
+            id: isq39r7hz3ki0
+          format: float
+          description: всего бонусов на счету
+        card:
+          type: integer
+          x-stoplight:
+            id: pcsnnwc0z7oex
+          description: 'номер карты, пример 2100047692'
+        transaction:
+          type: integer
+          x-stoplight:
+            id: hikcub9jn9c1t
+          description: номер транзакции
       required:
-        - id
-        - title
-        - cost
+        - station_id
         - date_time
-        - receipt
-      examples:
-        - id: '3946'
-          title: Заправка
-          cost: '2000'
-          delta_points: '100'
-          date_time: '2019-08-24T14:15:22Z'
-          station_address: 'г.Чебоксарыб ул. Солнечная, 26'
-          receipt: /json/pointer
+        - litres
+        - price
+        - summ
+        - products_title
+        - bonuses_percentage
+        - is_card_payment
+        - earned_bonuses
+        - total_bokuses
+        - card
+        - transaction
     PromotionShort:
       title: PromotionShort
       x-stoplight:
